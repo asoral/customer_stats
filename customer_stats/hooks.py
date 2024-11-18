@@ -213,3 +213,7 @@ app_license = "MIT"
 # auth_hooks = [
 # 	"customer_stats.auth.validate"
 # ]
+
+doctype_js = {
+    "Customer" : "public/js/customer.js"
+}
