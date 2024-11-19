@@ -6,7 +6,7 @@ frappe.ui.form.on("Customer", {
 
 $.extend(erpnext.utils, {
 	set_party_dashboard_indicators: function (frm) {
-        console.log("Stast code overrided by Customer Stats App");
+        console.log("Customer Stats overrided by Customer Stats App");
         if (frm.doc.__onload && frm.doc.__onload.dashboard_info) {
 			var company_wise_info = frm.doc.__onload.dashboard_info;
 			if (company_wise_info.length > 1) {
@@ -38,7 +38,7 @@ $.extend(erpnext.utils, {
 				}
 
                 frappe.call({
-                    "method":"florence.florence.customer.get_previous_year_billing",
+                    "method":"customer_stats.overrides.customer.get_previous_year_billing",
                     args:{
                         "name":frm.doc.name,
                         "loyalty_program":frm.doc.loyalty_program
@@ -59,7 +59,7 @@ $.extend(erpnext.utils, {
                 })
                 
                 frappe.call({
-                    "method":"florence.florence.customer.get_payment_days",
+                    "method":"customer_stats.overrides.customer.get_payment_days",
                     args:{
                         "name":frm.doc.name
                     },
