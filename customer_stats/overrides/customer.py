@@ -133,3 +133,86 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
         info["billing_this_year"] = flt(billing_this_year) if billing_this_year else 0
 
         return info["billing_this_year"]
+
+
+
+# @frappe.whitelist()
+# def get_avg_payment_days_without_dunnings(name):
+#     payments = frappe.db.sql("""
+#         SELECT AVG(DATEDIFF(pe.posting_date, si.posting_date)) as avg_days
+#         FROM `tabPayment Entry` pe
+#         JOIN `tabPayment Entry Reference` per ON per.parent = pe.name
+#         JOIN `tabSales Invoice` si ON per.reference_name = si.name
+#         WHERE pe.party = %s 
+#         AND si.status = 'Paid' 
+#         AND per.reference_doctype = 'Sales Invoice'
+#         AND NOT EXISTS (
+#             SELECT 1 FROM `tabDunning` d WHERE d.sales_invoice = si.name AND d.docstatus = 1
+#         )
+#     """, (name,), as_dict=True)
+
+#     return round(payments[0].avg_days) if payments and payments[0].avg_days else 0
+
+
+@frappe.whitelist()
+def get_avg_payment_days_without_dunnings(name):
+    payments = frappe.db.sql("""
+        SELECT si.name AS invoice, pe.name AS payment_entry, si.posting_date AS invoice_date, 
+               pe.posting_date AS payment_date, DATEDIFF(pe.posting_date, si.posting_date) AS days_diff
+        FROM `tabPayment Entry` pe
+        JOIN `tabPayment Entry Reference` per ON per.parent = pe.name
+        JOIN `tabSales Invoice` si ON per.reference_name = si.name
+        WHERE pe.party = %s 
+        AND si.status = 'Paid' 
+        AND per.reference_doctype = 'Sales Invoice'
+        AND NOT EXISTS (
+            SELECT 1 FROM `tabDunning` d WHERE d.sales_invoice = si.name AND d.docstatus = 1
+        )
+    """, (name,), as_dict=True)
+
+    total_days = 0
+    count = 0
+
+    for payment in payments:
+        
+        total_days += payment.days_diff
+        count += 1
+
+    avg_days = round(total_days / count) if count > 0 else 0
+
+    
+    return avg_days
+@frappe.whitelist()
+def get_total_dunning_amount(name):
+    """Calculates the total outstanding amount for unresolved dunning records."""
+    
+    query = """
+        SELECT d.name AS dunning_entry, d.grand_total
+        FROM `tabDunning` d
+        WHERE d.customer = %s
+        AND d.status = 'Unresolved'
+    """
+    
+    results = frappe.db.sql(query, (name,), as_dict=True)
+
+    total_dunning = sum(dunning.grand_total for dunning in results) if results else 0
+
+    for dunning in results:
+        
+
+     return total_dunning
+
+# @frappe.whitelist()
+# def get_total_dunning_amount(name):
+#     """Calculates the total outstanding amount for unresolved dunning records."""
+    
+#     query = """
+#         SELECT COALESCE(SUM(d.total_outstanding), 0) AS total_dunning
+#         FROM `tabDunning` d
+#         WHERE d.customer = %s
+#         AND d.status = 'Unresolved'
+#     """
+    
+#     result = frappe.db.sql(query, (name,), as_dict=True)
+    
+#     return result[0].total_dunning if result else 0
