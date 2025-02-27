@@ -202,17 +202,3 @@ def get_total_dunning_amount(name):
 
      return total_dunning
 
-# @frappe.whitelist()
-# def get_total_dunning_amount(name):
-#     """Calculates the total outstanding amount for unresolved dunning records."""
-    
-#     query = """
-#         SELECT COALESCE(SUM(d.total_outstanding), 0) AS total_dunning
-#         FROM `tabDunning` d
-#         WHERE d.customer = %s
-#         AND d.status = 'Unresolved'
-#     """
-    
-#     result = frappe.db.sql(query, (name,), as_dict=True)
-    
-#     return result[0].total_dunning if result else 0
