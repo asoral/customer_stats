@@ -23,7 +23,8 @@ def get_payment_days(name):
 
 
 def get_avg_payment_days_cal(party,from_date,to_date):
-    filters={"party":party,"from_date":from_date,"to_date":to_date}
+    filters={"party":party,"from_date":from_date,"to_date":to_date,"company":frappe.defaults.get_user_default("Company")
+}
     a=execute(frappe._dict(filters))
     if a:
         if len(a)==2:
